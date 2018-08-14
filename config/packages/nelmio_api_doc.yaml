@@ -1,0 +1,40 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Expago
+            description: This is an awesome app!
+            version: 1.0.0
+        parameters:
+          languages:
+            name: accept-language
+            in: header
+            type: string
+            required: true
+            enum: ['en', 'ru']
+            description: 'App header languages'
+        securityDefinitions:
+            Bearer:
+                type: apiKey
+                description: Your Json Web Token
+                name:  Authorization
+                in: header
+        definitions:
+            translation:
+                type: array
+                items:
+                   type: array
+                example:
+                   - en
+                   - ru
+            name:
+                type: string
+            title:
+                type: string
+            description:
+                type: string
+        security:
+            - Bearer: []
+    routes: # to filter documented routes
+        path_patterns:
+            - ^/(?!admin|_profiler|_error|_wdt) # Accepts routes under /api except /api/doc
+    models: { use_jms: true }

@@ -1,0 +1,16 @@
+dependencies:
+  override:
+    - echo "Ignore CircleCI defaults"
+
+test:
+  override:
+    - echo "Ignore CircleCI defaults"
+
+deployment:
+  staging:
+    branch: master
+    commands:
+      - ssh expago@ip "cd app/api && git checkout master . && git pull && sudo chmod a+x provision.sh && ./provision.sh"
+    branch: dev
+    commands:
+      - ssh expago@ip "cd app/api && git checkout dev . && git pull && sudo chmod a+x provision.sh && ./provision.sh"

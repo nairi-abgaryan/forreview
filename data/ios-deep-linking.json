@@ -1,0 +1,19 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "U8CSJE9SQ2.com.expago.exp",
+        "paths": ["/activate", "/reset-password"]
+      },
+      {
+        "appID": "U8CSJE9SQ2.com.expago.exp.debug",
+        "paths": ["/activate", "/reset-password"]
+      },
+      {
+        "appID": "U8CSJE9SQ2.com.expago.exp.staging",
+        "paths": ["/activate", "/reset-password"]
+      }
+    ]
+  }
+}

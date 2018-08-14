@@ -1,0 +1,29 @@
+###> symfony/framework-bundle ###
+.env
+/.vagrant/*
+.idea/*
+/public/bundles/
+/public/vendor/logo/
+/public/vendor/build/
+/config/jwt/
+/assets/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> symfony/webpack-encore-pack ###
+/node_modules/
+/public/build/
+###< symfony/webpack-encore-pack ###
+
+###> symfony/phpunit-bridge ###
+.phpunit
+/phpunit.xml
+###< symfony/phpunit-bridge ###
+Vagrantfile
+.DS_Store
+/assets/*
+documentation
+expago.yml
+data/down_in_prod
+yarn.lock

@@ -1,0 +1,144 @@
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+    admin_email: '%env(USERNAME)%'
+    admin_password: '%env(PASSWORD)%'
+    upload_dir: '%env(UPLOAD_DIR)%'
+    sparkpost_api_key: '%env(SPARKPOST_KEY)%'
+    twilio_id: '%env(twilio_id)%'
+    twilio_token: '%env(twilio_token)%'
+    twilio_phone: '%env(twilio_phone)%'
+    locale: en
+    google_api_key: '%env(GOOGLE_API_KEY)%'
+    google_url: 'https://maps.googleapis.com/maps/api/place/'
+    base_url: '%env(base_url)%'
+
+lunetics_locale:
+  guessing_order:
+    - router
+    - browser
+  allowed_locales:
+    - en
+    - ru
+  strict_mode: true
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        public: false       # Allows optimizing the container by removing unused services; this also means
+        bind:
+            $apiKey: '%sparkpost_api_key%'
+            $google_api_key: '%google_api_key%'
+            $google_url: '%google_url%'
+            $locale: '%lunetics_locale.allowed_locales%'
+            $cloudinary_cloud_name: '%env(CLOUDINARY_CLOUD_NAME)%'
+            $cloudinary_api_key: '%env(CLOUDINARY_API_KEY)%'
+            $cloudinary_api_secret: '%env(CLOUDINARY_API_SECRET)%'
+            $cloudinary_folder: '%env(CLOUDINARY_FOLDER)%'
+            $baseUrl: '%base_url%'
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/*'
+        exclude: '../src/{Entity,Migrations,Tests,Kernel.php}'
+
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    App\Controller\:
+        resource: '../src/Controller'
+        public: true
+        tags: ['controller.service_arguments']
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    League\OAuth2\Client\Provider\Facebook:
+        arguments:
+            -
+              clientId: "%env(facebook_app_id)%"
+              clientSecret: "%env(facebook_app_secret)%"
+              graphApiVersion: v2.8
+
+    app.security.login_form_authenticator:
+        class: App\Security\LoginFormAuthenticator
+        autowire: true
+        arguments: ["@form.factory", "@doctrine.orm.entity_manager", "@router", "@security.password_encoder", "@request_stack"]
+
+    app.security.token_authenticator:
+        class: App\Security\TokenAuthenticator
+        autowire: true
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Param converters
+    # ------------------------------------------------------------------------------------------------------------------
+
+    app.user_param_converter:
+        class: App\HTTP\UserParamConvertor
+        public: true
+        arguments:
+              - "@app.user_manager"
+              - "@security.token_storage"
+        tags:
+            - {name: request.param_converter, converter: app.user_param_converter, priority: -2}
+
+    App\Doctrine\HashPasswordSubscriber:
+        tags:
+          - {name: doctrine.event_subscriber}
+
+    App\EventListener\ImageListener:
+        tags:
+          - {name: doctrine.event_subscriber}
+
+    app.image_manager:
+        class: App\Manager\ImageManager
+        autowire: true
+        public: true
+
+    app.hash_service:
+        class: App\Service\HashService
+        autowire: true
+        public: true
+
+    before_request_listener:
+        class: App\EventListener\BeforeRequestListener
+        arguments: ["@doctrine.orm.entity_manager"]
+        tags:
+            -
+              name: kernel.event_listener
+              event: kernel.request
+              method: onKernelRequest
+
+    local_listener:
+        class: App\EventListener\LocaleListener
+        tags:
+            -
+              name: kernel.event_listener
+              event: kernel.request
+              method: onKernelRequest
+
+    app.pagintaion:
+        class: App\Service\PaginationFactory
+        autowire: true
+        public: true
+
+    app.cloudinary_service:
+        class: App\Service\CloudinaryService
+        public: true
+
+    app.mailer_service:
+        class: App\Service\MailerService
+        autowire: true
+
+    app.user_manager:
+        class: App\Manager\UserManager
+        autowire: true
+
+    app.sms_service:
+        class: App\Service\SMSService
+        arguments: ['%twilio_id%','%twilio_token%','%twilio_phone%']
+        public: true
+        autowire: false
+
